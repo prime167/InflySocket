@@ -15,11 +15,11 @@
         <TextBox
             x:Name="txbClients" Width="202" Height="262" Margin="43,122,0,0"
             HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Text=""
-            TextWrapping="Wrap" />
+            TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
         <TextBox
             x:Name="txbMsg" Width="353" Height="262" Margin="295,122,0,0"
             HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Text=""
-            TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
+            TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" TextChanged="TxbMsg_OnTextChanged"/>
         <Button
             x:Name="btnSend" Width="75" Margin="573,413,0,0" HorizontalAlignment="Left"
             VerticalAlignment="Top" Click="BtnSend_Click" Content="发送" RenderTransformOrigin="1.525,0.741" />

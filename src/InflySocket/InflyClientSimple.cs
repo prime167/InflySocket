@@ -49,7 +49,8 @@ namespace InflySocket
                         if (!_socket.Connected)
                         {
                             _socket.Connect(point);
-                            Thread.Sleep(5000);
+                            OnConnected();
+                            Thread.Sleep(500);
                         }
                         else
                         {
@@ -67,6 +68,11 @@ namespace InflySocket
         protected virtual void OnClosed()
         {
             OnCloseEvent?.Invoke();
+        }
+
+        protected virtual void OnConnected()
+        {
+            OnConnectedEvent?.Invoke();
         }
 
         protected virtual void OnReceiveMessage(string message)

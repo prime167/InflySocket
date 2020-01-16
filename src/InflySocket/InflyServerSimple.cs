@@ -48,12 +48,10 @@ namespace InflySocket
             // 设置监听队列的长度；
             _socket.Listen(100);
             _running = true;
-            Task.Run(() =>
-            {
-                ListenConnectingAsync();
-            });
+            Task.Run(ListenConnectingAsync);
             return true;
         }
+
         /// <summary>
         /// 监听客户端请求的方法；
         /// </summary>

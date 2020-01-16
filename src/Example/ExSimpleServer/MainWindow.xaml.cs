@@ -1,18 +1,7 @@
 ﻿using InflySocket;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ExSimpleServer
 {
@@ -76,6 +65,11 @@ namespace ExSimpleServer
         {
             _server.Send(txbSend.Text);
             txbMsg.AppendText($"发送消息：{txbSend.Text}{'\n'}");
+        }
+
+        private void TxbMsg_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            txbMsg.ScrollToEnd();
         }
     }
 }

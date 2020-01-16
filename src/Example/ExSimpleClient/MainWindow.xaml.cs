@@ -1,18 +1,7 @@
 ﻿using InflySocket;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ExSimpleClient
 {
@@ -44,7 +33,7 @@ namespace ExSimpleClient
         {
             Dispatcher?.BeginInvoke(new Action(() =>
             {
-                txbMsg.AppendText($"连接{'\n'}");
+                txbMsg.AppendText($"已连接{'\n'}");
                 btnConnect.Content = "已连接";
             }));
         }
@@ -67,6 +56,11 @@ namespace ExSimpleClient
         {
             _client.Send(txbSend.Text);
             txbMsg.AppendText($"发送消息：{txbSend.Text}{'\n'}");
+        }
+
+        private void TxbMsg_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            txbMsg.ScrollToEnd();
         }
     }
 }
