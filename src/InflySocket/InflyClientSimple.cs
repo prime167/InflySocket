@@ -15,7 +15,7 @@ namespace InflySocket
     {
         private bool _running;
         private Socket _socket;
-        public char Separator = '#';
+        public char Separator = '\n';
         public delegate void OnConnectedHandler();
         public delegate void OnReceiveMessageHandler(string msg);
         public delegate void OnClosedHandler();
@@ -145,7 +145,7 @@ namespace InflySocket
                 }
             }
             // 告诉pipe已完成
-            writer.Complete();
+            await writer.CompleteAsync();
         }
 
         //读取流
@@ -155,6 +155,7 @@ namespace InflySocket
             {
                 //等待writer写数据
                 ReadResult result = await reader.ReadAsync();
+
                 //获得内存区域
                 ReadOnlySequence<byte> buffer = result.Buffer;
                 SequencePosition? position = null;
@@ -169,7 +170,7 @@ namespace InflySocket
                         // 处理这一行
                         ProcessLine(buffer.Slice(0, position.Value).ToArray());
 
-                        // 跳过 这一行
+                        // 跳过这一行
                         buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
                     }
                 }
@@ -183,7 +184,7 @@ namespace InflySocket
                 }
             }
             //将PipeReader标记为完成
-            reader.Complete();
+            await reader.CompleteAsync();
         }
 
         private void ProcessLine(byte[] data)

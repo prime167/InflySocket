@@ -54,7 +54,7 @@ namespace ExSimpleClient
 
         private void BtnSend_Click(object sender, RoutedEventArgs e)
         {
-            _client.Send(txbSend.Text);
+            _client.Send(txbSend.Text+'\n');
             txbMsg.AppendText($"发送消息：{txbSend.Text}{'\n'}");
         }
 

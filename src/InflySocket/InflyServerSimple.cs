@@ -14,7 +14,7 @@ namespace InflySocket
     public class InflyServerSimple
     {
         #region Public
-        public char Separator = '#';
+        public char Separator = '\n';
         public delegate void OnNewConnectedHandler(SessionBase newClient);
         public delegate void OnReceiveMessageHandler(string msg);
 

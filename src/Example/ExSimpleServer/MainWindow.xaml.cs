@@ -63,7 +63,7 @@ namespace ExSimpleServer
 
         private void BtnSend_Click(object sender, RoutedEventArgs e)
         {
-            _server.Send(txbSend.Text);
+            _server.Send(txbSend.Text+'\n');
             txbMsg.AppendText($"发送消息：{txbSend.Text}{'\n'}");
         }
 
