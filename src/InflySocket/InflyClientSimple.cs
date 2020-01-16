@@ -50,6 +50,7 @@ namespace InflySocket
                         {
                             _socket.Connect(point);
                             OnConnected();
+
                             Thread.Sleep(500);
                         }
                         else
