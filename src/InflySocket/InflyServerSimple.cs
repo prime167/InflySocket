@@ -175,7 +175,7 @@ namespace InflySocket
                 }
             }
             // 告诉pipe已完成
-            writer.Complete();
+            await writer.CompleteAsync();
         }
 
         //读取流
@@ -199,7 +199,7 @@ namespace InflySocket
                         // 处理这一行
                         ProcessLine(buffer.Slice(0, position.Value).ToArray());
 
-                        // 跳过 这一行
+                        // 跳过这一行
                         buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
                     }
                 }
@@ -213,7 +213,7 @@ namespace InflySocket
                 }
             }
             //将PipeReader标记为完成
-            reader.Complete();
+            await reader.CompleteAsync();
         }
 
         private void ProcessLine(byte[] data)
