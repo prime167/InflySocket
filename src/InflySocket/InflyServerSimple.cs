@@ -185,6 +185,7 @@ namespace InflySocket
             {
                 //等待writer写数据
                 ReadResult result = await reader.ReadAsync();
+
                 //获得内存区域
                 ReadOnlySequence<byte> buffer = result.Buffer;
                 SequencePosition? position = null;
