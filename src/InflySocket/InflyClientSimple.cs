@@ -142,7 +142,7 @@ namespace InflySocket
         }
 
         //读取流
-        async Task ReadPipeAsync(PipeReader reader)
+        private async Task ReadPipeAsync(PipeReader reader)
         {
             while (_running)
             {
