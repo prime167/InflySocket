@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
@@ -117,14 +116,8 @@ namespace InflySocket
                 Memory<byte> memory = writer.GetMemory(minimumBufferSize);
                 try
                 {
-                    //将内存空间变成ArraySegment，提供给socket使用
-                    if (!MemoryMarshal.TryGetArray(memory, out ArraySegment<byte> arraySegment))
-                    {
-                        throw new InvalidOperationException("Buffer backed by array was expected");
-                    }
-
                     //接受数据
-                    int bytesRead = await socket.ReceiveAsync(arraySegment, SocketFlags.None);
+                    int bytesRead = await socket.ReceiveAsync(memory, SocketFlags.None);
                     if (bytesRead == 0)
                     {
                         break;
@@ -168,7 +161,7 @@ namespace InflySocket
                     if (position != null)
                     {
                         // 处理这一行
-                        ProcessLine(buffer.Slice(0, position.Value).ToArray());
+                        ProcessLine(buffer.Slice(0, position.Value));
 
                         // 跳过这一行
                         buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
@@ -187,10 +180,13 @@ namespace InflySocket
             await reader.CompleteAsync();
         }
 
-        private void ProcessLine(byte[] data)
+        private void ProcessLine(ReadOnlySequence<byte> buffer)
         {
-            string msg = Encoding.UTF8.GetString(data);
-            OnReceiveMessage(msg);
+            foreach (ReadOnlyMemory<byte> segment in buffer)
+            {
+                string msg = Encoding.UTF8.GetString(segment);
+                OnReceiveMessage(msg);
+            }
         }
         #endregion
     }
