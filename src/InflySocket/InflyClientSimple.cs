@@ -13,47 +13,47 @@ namespace InflySocket
 {
     public class InflyClientSimple
     {
-        private bool running;
-        private Socket socket;
-        public char separator = '#';
+        private bool _running;
+        private Socket _socket;
+        public char Separator = '#';
         public delegate void OnConnectedHandler();
-        public delegate void OnReceviceMessageHandler(string msg);
+        public delegate void OnReceiveMessageHandler(string msg);
         public delegate void OnClosedHandler();
 
         public event OnConnectedHandler OnConnectedEvent;
-        public event OnReceviceMessageHandler OnReceviceMessageEvent;
+        public event OnReceiveMessageHandler OnReceiveMessageEvent;
         public event OnClosedHandler OnCloseEvent;
 
         public bool IsConnected
         {
             get
             {
-                if (socket == null) return false;
-                return socket.Connected;
+                if (_socket == null) return false;
+                return _socket.Connected;
             }
         }
 
         public void Connect(string ip, int port)
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPAddress iPAddress = IPAddress.Parse(ip);
             IPEndPoint point = new IPEndPoint(iPAddress, port);
-            running = true;
+            _running = true;
 
             Task.Run(() =>
             {
-                while (running)
+                while (_running)
                 {
                     try
                     {
-                        if (!socket.Connected)
+                        if (!_socket.Connected)
                         {
-                            socket.Connect(point);
+                            _socket.Connect(point);
                             Thread.Sleep(5000);
                         }
                         else
                         {
-                            ProcessLinesAsync(socket).ConfigureAwait(false);
+                            ProcessLinesAsync(_socket).ConfigureAwait(false);
                         }
                     }
                     catch (SocketException exp)
@@ -61,7 +61,6 @@ namespace InflySocket
 
                     }
                 }
-
             });
         }
 
@@ -70,26 +69,26 @@ namespace InflySocket
             OnCloseEvent?.Invoke();
         }
 
-        protected virtual void OnReceviceMessage(string message)
+        protected virtual void OnReceiveMessage(string message)
         {
-            OnReceviceMessageEvent?.Invoke(message);
+            OnReceiveMessageEvent?.Invoke(message);
         }
 
         public void Send(byte[] buf)
         {
-            if (socket.Connected)
-                socket.Send(buf);
+            if (_socket.Connected)
+                _socket.Send(buf);
         }
 
         public void Send(string msg)
         {
-            var sendMsg = System.Text.Encoding.UTF8.GetBytes(msg);
+            var sendMsg = Encoding.UTF8.GetBytes(msg);
             Send(sendMsg);
         }
 
         #region Pipelines
 
-        async Task ProcessLinesAsync(Socket socket)
+        private async Task ProcessLinesAsync(Socket socket)
         {
             var pipe = new Pipe();
             Task writing = FillPipeAsync(socket, pipe.Writer);
@@ -101,23 +100,24 @@ namespace InflySocket
         }
 
         //写入循环
-        async Task FillPipeAsync(Socket socket, PipeWriter writer)
+        private async Task FillPipeAsync(Socket socket, PipeWriter writer)
         {
             const int minimumBufferSize = 512;
 
-            while (running)
+            while (_running)
             {
                 //从PipeWriter至少分配512字节
                 Memory<byte> memory = writer.GetMemory(minimumBufferSize);
                 try
                 {
                     //将内存空间变成ArraySegment，提供给socket使用
-                    if (!MemoryMarshal.TryGetArray((ReadOnlyMemory<byte>)memory, out ArraySegment<byte> arraySegment))
+                    if (!MemoryMarshal.TryGetArray(memory, out ArraySegment<byte> arraySegment))
                     {
                         throw new InvalidOperationException("Buffer backed by array was expected");
                     }
+
                     //接受数据
-                    int bytesRead = await SocketTaskExtensions.ReceiveAsync(socket, arraySegment, SocketFlags.None);
+                    int bytesRead = await socket.ReceiveAsync(arraySegment, SocketFlags.None);
                     if (bytesRead == 0)
                     {
                         break;
@@ -144,7 +144,7 @@ namespace InflySocket
         //读取流
         async Task ReadPipeAsync(PipeReader reader)
         {
-            while (running)
+            while (_running)
             {
                 //等待writer写数据
                 ReadResult result = await reader.ReadAsync();
@@ -155,7 +155,7 @@ namespace InflySocket
                 do
                 {
                     // 在缓冲数据中查找找一个行末尾
-                    position = buffer.PositionOf((byte)separator);
+                    position = buffer.PositionOf((byte)Separator);
 
                     if (position != null)
                     {
@@ -181,8 +181,8 @@ namespace InflySocket
 
         private void ProcessLine(byte[] data)
         {
-            string msg = System.Text.Encoding.UTF8.GetString(data);
-            OnReceviceMessage(msg);
+            string msg = Encoding.UTF8.GetString(data);
+            OnReceiveMessage(msg);
         }
         #endregion
     }

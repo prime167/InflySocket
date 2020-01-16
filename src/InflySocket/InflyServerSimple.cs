@@ -14,40 +14,40 @@ namespace InflySocket
     public class InflyServerSimple
     {
         #region Public
-        public char separator = '#';
+        public char Separator = '#';
         public delegate void OnNewConnectedHandler(SessionBase newClient);
-        public delegate void OnReceviceMessageHandler(string msg);
+        public delegate void OnReceiveMessageHandler(string msg);
 
         public event OnNewConnectedHandler OnNewConnectedEvent;
-        public event OnReceviceMessageHandler OnReceviceMessageEvent;
+        public event OnReceiveMessageHandler OnReceiveMessageEvent;
         public event OnNewConnectedHandler OnCloseEvent;
 
         #endregion
 
         #region Socket
-        private bool running;
-        private Socket socket;
+        private bool _running;
+        private Socket _socket;
 
         public List<SessionBase> Clients = new List<SessionBase>();//tcp客户端字典
 
         public bool Listen(int port)
         {
-            if (socket != null)
-                socket.Close();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket?.Close();
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, port);
             try
             {
                 // 将负责监听的套接字绑定到唯一的ip和端口上；
-                socket.Bind(endPoint);
+                _socket.Bind(endPoint);
             }
-            catch(Exception exp)
+            catch (Exception exp)
             {
                 return false;
             }
+
             // 设置监听队列的长度；
-            socket.Listen(100);
-            running = true;
+            _socket.Listen(100);
+            _running = true;
             Task.Run(() =>
             {
                 ListenConnectingAsync();
@@ -59,21 +59,21 @@ namespace InflySocket
         /// </summary>
         private void ListenConnectingAsync()
         {
-            while (running)  // 持续不断的监听客户端的连接请求；
+            while (_running)  // 持续不断的监听客户端的连接请求；
             {
                 try
                 {
-                    Socket sokConnection = socket.Accept(); // 一旦监听到一个客户端的请求，就返回一个与该客户端通信的 套接字；
+                    Socket sokConnection = _socket.Accept(); // 一旦监听到一个客户端的请求，就返回一个与该客户端通信的 套接字；
                     // 将与客户端连接的 套接字 对象添加到集合中；
-                    string str_EndPoint = sokConnection.RemoteEndPoint.ToString();
-                    SessionBase myTcpClient = new SessionBase() { TcpSocket = sokConnection, EndPoint = str_EndPoint };
+                    string strEndPoint = sokConnection.RemoteEndPoint.ToString();
+                    SessionBase myTcpClient = new SessionBase { TcpSocket = sokConnection, EndPoint = strEndPoint };
                     Clients.Add(myTcpClient);
                     OnNewConnected(myTcpClient);
 
                     Task.Run(() =>
                     {
                         ProcessLinesAsync(myTcpClient).ConfigureAwait(false);
-                    });                    
+                    });
                 }
                 catch (Exception exp)
                 {
@@ -85,8 +85,8 @@ namespace InflySocket
 
         public void Close()
         {
-            running = false;
-            socket.Close();
+            _running = false;
+            _socket.Close();
         }
 
         public void Send(byte[] buf)
@@ -99,7 +99,7 @@ namespace InflySocket
 
         public void Send(string msg)
         {
-            var buf = System.Text.Encoding.UTF8.GetBytes(msg);
+            byte[] buf = System.Text.Encoding.UTF8.GetBytes(msg);
             foreach (var client in Clients)
             {
                 client.Send(buf);
@@ -112,10 +112,10 @@ namespace InflySocket
             OnNewConnectedEvent?.Invoke(newClient);
         }
 
-        protected virtual void OnReceviceMessage(string msg)
+        protected virtual void OnReceiveMessage(string msg)
         {
             Console.WriteLine(msg);
-            OnReceviceMessageEvent?.Invoke(msg);
+            OnReceiveMessageEvent?.Invoke(msg);
         }
 
         protected virtual void OnClientClose(SessionBase newClient)
@@ -127,7 +127,7 @@ namespace InflySocket
 
         #region Pipelines
 
-        async Task ProcessLinesAsync(SessionBase sessionBase)
+        private async Task ProcessLinesAsync(SessionBase sessionBase)
         {
             var pipe = new Pipe();
             Task writing = FillPipeAsync(sessionBase.TcpSocket, pipe.Writer);
@@ -139,23 +139,24 @@ namespace InflySocket
         }
 
         //写入循环
-        async Task FillPipeAsync(Socket socket, PipeWriter writer)
+        private async Task FillPipeAsync(Socket socket, PipeWriter writer)
         {
             const int minimumBufferSize = 512;
 
-            while (running)
+            while (_running)
             {
                 //从PipeWriter至少分配512字节
                 Memory<byte> memory = writer.GetMemory(minimumBufferSize);
                 try
                 {
                     //将内存空间变成ArraySegment，提供给socket使用
-                    if (!MemoryMarshal.TryGetArray((ReadOnlyMemory<byte>)memory, out ArraySegment<byte> arraySegment))
+                    if (!MemoryMarshal.TryGetArray(memory, out ArraySegment<byte> arraySegment))
                     {
                         throw new InvalidOperationException("Buffer backed by array was expected");
                     }
+
                     //接受数据
-                    int bytesRead = await SocketTaskExtensions.ReceiveAsync(socket, arraySegment, SocketFlags.None);
+                    int bytesRead = await socket.ReceiveAsync(arraySegment, SocketFlags.None);
                     if (bytesRead == 0)
                     {
                         break;
@@ -180,9 +181,9 @@ namespace InflySocket
         }
 
         //读取流
-        async Task ReadPipeAsync(PipeReader reader)
+        private async Task ReadPipeAsync(PipeReader reader)
         {
-            while (running)
+            while (_running)
             {
                 //等待writer写数据
                 ReadResult result = await reader.ReadAsync();
@@ -193,7 +194,7 @@ namespace InflySocket
                 do
                 {
                     // 在缓冲数据中查找找一个行末尾
-                    position = buffer.PositionOf((byte)separator);
+                    position = buffer.PositionOf((byte)Separator);
 
                     if (position != null)
                     {
@@ -220,7 +221,7 @@ namespace InflySocket
         private void ProcessLine(byte[] data)
         {
             string msg = System.Text.Encoding.UTF8.GetString(data);
-            OnReceviceMessage(msg);
+            OnReceiveMessage(msg);
         }
         #endregion
     }

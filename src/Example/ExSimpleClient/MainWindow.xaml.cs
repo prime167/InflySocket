@@ -21,20 +21,20 @@ namespace ExSimpleClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        InflyClientSimple client = new InflyClientSimple();
+        private readonly InflyClientSimple _client = new InflyClientSimple();
 
         public MainWindow()
         {
             InitializeComponent();
 
-            client.OnReceviceMessageEvent += Client_OnReceviceMessageEvent;
-            client.OnConnectedEvent += Client_OnConnectedEvent;
-            client.OnCloseEvent += Client_OnCloseEvent;
+            _client.OnReceiveMessageEvent += Client_OnReceiveMessageEvent;
+            _client.OnConnectedEvent += Client_OnConnectedEvent;
+            _client.OnCloseEvent += Client_OnCloseEvent;
         }
 
-        private void Client_OnReceviceMessageEvent(string msg)
+        private void Client_OnReceiveMessageEvent(string msg)
         {
-            Dispatcher.BeginInvoke(new Action(() =>
+            Dispatcher?.BeginInvoke(new Action(() =>
             {
                 txbMsg.AppendText($"收到消息：{msg}{'\n'}");
             }));
@@ -42,7 +42,7 @@ namespace ExSimpleClient
 
         private void Client_OnConnectedEvent()
         {
-            Dispatcher.BeginInvoke(new Action(() =>
+            Dispatcher?.BeginInvoke(new Action(() =>
             {
                 txbMsg.AppendText($"连接{'\n'}");
                 btnConnect.Content = "已连接";
@@ -51,7 +51,7 @@ namespace ExSimpleClient
 
         private void Client_OnCloseEvent()
         {
-            Dispatcher.BeginInvoke(new Action(() =>
+            Dispatcher?.BeginInvoke(new Action(() =>
             {
                 txbMsg.AppendText($"已断开{'\n'}");
                 btnConnect.Content = "连接";
@@ -60,12 +60,12 @@ namespace ExSimpleClient
 
         private void BtnConnect_Click(object sender, RoutedEventArgs e)
         {
-            client.Connect(txbIP.Text, int.Parse(txbPort.Text));
+            _client.Connect(txbIP.Text, int.Parse(txbPort.Text));
         }
 
         private void BtnSend_Click(object sender, RoutedEventArgs e)
         {
-            client.Send(txbSend.Text);
+            _client.Send(txbSend.Text);
             txbMsg.AppendText($"发送消息：{txbSend.Text}{'\n'}");
         }
     }
