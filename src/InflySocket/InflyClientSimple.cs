@@ -125,7 +125,7 @@ namespace InflySocket
                     //一次接受完毕，数据已经在pipe中，告诉pipe已经给它写了多少数据。
                     writer.Advance(bytesRead);
                 }
-                catch
+                catch(Exception ex)
                 {
                     break;
                 }
@@ -151,7 +151,7 @@ namespace InflySocket
 
                 //获得内存区域
                 ReadOnlySequence<byte> buffer = result.Buffer;
-                SequencePosition? position = null;
+                SequencePosition? position;
 
                 do
                 {
