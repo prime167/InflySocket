@@ -15,7 +15,7 @@
         <TextBox
             x:Name="txbMsg" Width="605" Height="262" Margin="43,122,0,0"
             HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Text=""
-            TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" TextChanged="TxbMsg_OnTextChanged"/>
+            TextChanged="TxbMsg_OnTextChanged" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
         <Button
             x:Name="btnSend" Width="75" Margin="573,413,0,0" HorizontalAlignment="Left"
             VerticalAlignment="Top" Click="BtnSend_Click" Content="发送" RenderTransformOrigin="1.525,0.741" />

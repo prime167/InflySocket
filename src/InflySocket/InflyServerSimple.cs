@@ -112,7 +112,6 @@ namespace InflySocket
 
         protected virtual void OnReceiveMessage(string msg)
         {
-            Console.WriteLine(msg);
             OnReceiveMessageEvent?.Invoke(msg);
         }
 
@@ -156,7 +155,7 @@ namespace InflySocket
                     //一次接受完毕，数据已经在pipe中，告诉pipe已经给它写了多少数据。
                     writer.Advance(bytesRead);
                 }
-                catch
+                catch(Exception ex)
                 {
                     break;
                 }
