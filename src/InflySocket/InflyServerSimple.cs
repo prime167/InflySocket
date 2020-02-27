@@ -97,7 +97,7 @@ namespace InflySocket
 
         public void Send(string msg)
         {
-            byte[] buf = System.Text.Encoding.UTF8.GetBytes(msg);
+            byte[] buf = Encoding.UTF8.GetBytes(msg);
             foreach (var client in Clients)
             {
                 client.Send(buf);

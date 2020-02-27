@@ -23,6 +23,7 @@ namespace InflySocket
                 TcpSocket.Send(buf);
             }
         }
+
         /// <summary>
         /// 获取连接的ip
         /// </summary>
@@ -30,9 +31,10 @@ namespace InflySocket
         public string GetIp()
         {
             IPEndPoint clientipe = (IPEndPoint)TcpSocket.RemoteEndPoint;
-            string _ip = clientipe.Address.ToString();
-            return _ip;
+            string ip = clientipe.Address.ToString();
+            return ip;
         }
+
         /// <summary>
         /// 关闭连接
         /// </summary>
